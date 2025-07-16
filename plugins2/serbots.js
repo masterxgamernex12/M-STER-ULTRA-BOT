@@ -13,7 +13,7 @@ const {
 
 const { subBots, socketEvents, reconnectionAttempts } = require("../indexsubbots");
 
-const MAX_SUBBOTS = 200;
+const MAX_SUBBOTS = 300;
 
 const handler = async (msg, { conn, command, sock }) => {
   const usarPairingCode = ["sercode", "code"].includes(command);
