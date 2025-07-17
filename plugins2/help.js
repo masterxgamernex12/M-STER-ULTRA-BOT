@@ -1,60 +1,40 @@
-const fs   = require("fs");
+const fs = require("fs");
 const path = require("path");
 
 const handler = async (msg, { conn }) => {
   try {
-    // ─── Identificación y prefijo ─────────────────────────────────
-    const rawID    = conn.user?.id || "";
+    const rawID = conn.user?.id || "";
     const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
-    const cwd      = process.cwd();
-    const prefF    = path.join(cwd, "prefixes.json");
-    const menuF    = path.join(cwd, "setmenu.json");
 
-    // ─── Carga de prefijos ────────────────────────────────────────
+    const prefixPath = path.resolve("prefixes.json");
+    const menuConfigPath = path.resolve("setmenu.json");
+
     let prefixes = {};
-    if (fs.existsSync(prefF)) {
-      try {
-        prefixes = JSON.parse(fs.readFileSync(prefF, "utf8") || "{}");
-      } catch (e) {
-        prefixes = {};
-      }
+    if (fs.existsSync(prefixPath)) {
+      prefixes = JSON.parse(fs.readFileSync(prefixPath, "utf-8"));
     }
+
     const usedPrefix = prefixes[subbotID] || ".";
 
-    // ─── Reacción de entrada ─────────────────────────────────────
     await conn.sendMessage(msg.key.remoteJid, {
       react: { text: "📜", key: msg.key }
     });
 
-    // ─── Carga de menú personalizado ─────────────────────────────
     let customData = {};
-    if (fs.existsSync(menuF)) {
-      try {
-        customData = JSON.parse(fs.readFileSync(menuF, "utf8") || "{}");
-      } catch (e) {
-        customData = {};
-      }
-    }
-    // busca por subbotID y si no existe, por el chat JID
-    const personal = customData[subbotID] || customData[msg.key.remoteJid] || null;
-
-    // ─── Preparar imagen (base64 o URL) ───────────────────────────
-    const defaultUrl = "https://cdn.russellxz.click/654e40ee.jpeg";
-    let imageOpts   = { url: defaultUrl };
-    if (personal?.imagen) {
-      try {
-        imageOpts = { buffer: Buffer.from(personal.imagen, "base64") };
-      } catch (e) {
-        // si falla base64, sigue con defaultUrl
-      }
+    if (fs.existsSync(menuConfigPath)) {
+      customData = JSON.parse(fs.readFileSync(menuConfigPath, "utf8"));
     }
 
+    const personal = customData[subbotID];
+    const imageBuffer = personal?.imagen ? Buffer.from(personal.imagen, "base64") : null;
     const nombreMenu = personal?.nombre || "Azura Ultra 2.0 Subbot";
 
-    // ─── Construir caption ────────────────────────────────────────
-    let caption;
+    let caption = "";
+    let footer = "";
+
     if (personal) {
-      caption = `
+  // MENÚ PERSONALIZADO DISEÑO BONITO
+  caption = `
 ╭─❍ 𓂃 𝑺𝒖𝒃𝒃𝒐𝒕 𝑷𝒆𝒓𝒔𝒐𝒏𝒂𝒍𝒊𝒛𝒂𝒅𝒐 ❍─╮
 │   𝙈𝙚𝙣𝙪́: *${nombreMenu}*
 ╰────────────────────╯
@@ -112,10 +92,10 @@ const handler = async (msg, { conn }) => {
 
 ━━━━━━━━━━━━━━━━━━━━━━
 📍 TikTok: https://www.tiktok.com/@azuritabot?_t=ZT-8xpG3PgDQeT&_r=1
-🎨 𝗠𝗲𝗻𝘂́ 𝗽𝗲𝗿𝘀𝗼𝗻𝗮𝗹𝗶𝘇𝗮𝗱𝗼 𝗽𝗼𝗿 𝗲𝗹 𝘂𝘀𝘂𝗮𝗿𝗶𝗼  
-
+🎨 𝗠𝗲𝗻𝘂́ 𝗽𝗲𝗿𝘀𝗼𝗻𝗮𝗹𝗶𝘇𝗮𝗱𝗼 𝗽𝗼𝗿 𝗲𝗹 𝘂𝘀𝘂𝗮𝗿𝗶𝗼
 `.trim();
     } else {
+      // MENÚ POR DEFECTO NORMALITO
       caption = `
 ╔⌬ ${nombreMenu}⌬╗
 ║   Menú por categorías  
@@ -209,32 +189,28 @@ const handler = async (msg, { conn }) => {
 ▣ ${usedPrefix}delmenu ↷
   quita lo personalizado
 
-═⌬ AZURA ULTRA 2.0 Subbot ⌬═
-`.trim();
+═⌬ AZURA ULTRA 2.0 Subbot ⌬═`.trim();
     }
 
-    // ─── Envío del menú ────────────────────────────────────────────
     await conn.sendMessage(
       msg.key.remoteJid,
       {
-        image: imageOpts,
-        caption
+        image: imageBuffer ? imageBuffer : { url: `https://cdn.russellxz.click/654e40ee.jpeg` },
+        caption,
       },
       { quoted: msg }
     );
 
-    // ─── Reacción de salida ────────────────────────────────────────
     await conn.sendMessage(msg.key.remoteJid, {
       react: { text: "✅", key: msg.key }
     });
 
   } catch (err) {
     console.error("❌ Error en el menú:", err);
-    try {
-      await conn.sendMessage(msg.key.remoteJid, {
-        text: "❌ *Ocurrió un error mostrando el menú.*"
-      }, { quoted: msg });
-    } catch {}
+    await conn.sendMessage(msg.key.remoteJid, {
+      text: "❌ Ocurrió un error mostrando el menú.",
+      quoted: msg
+    });
   }
 };
 
