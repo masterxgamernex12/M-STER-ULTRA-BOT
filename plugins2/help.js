@@ -1,47 +1,57 @@
-const fs   = require('fs');
-const path = require('path');
+const fs   = require("fs");
+const path = require("path");
 
 const handler = async (msg, { conn }) => {
   try {
-    // ─── Prefijo y IDs ────────────────────────────────────────────────
-    const rawID   = conn.user?.id || '';
-    const subbot  = rawID.split(':')[0] + '@s.whatsapp.net';
-    const cwd     = process.cwd();
-    const prefF   = path.join(cwd, 'prefixes.json');
-    const menuF   = path.join(cwd, 'setmenu.json');
+    // ─── Identificación y prefijo ─────────────────────────────────
+    const rawID    = conn.user?.id || "";
+    const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
+    const cwd      = process.cwd();
+    const prefF    = path.join(cwd, "prefixes.json");
+    const menuF    = path.join(cwd, "setmenu.json");
 
-    // ─── Carga de prefijos ───────────────────────────────────────────
+    // ─── Carga de prefijos ────────────────────────────────────────
     let prefixes = {};
     if (fs.existsSync(prefF)) {
-      try { prefixes = JSON.parse(fs.readFileSync(prefF, 'utf8')||'{}'); }
-      catch { prefixes = {}; }
+      try {
+        prefixes = JSON.parse(fs.readFileSync(prefF, "utf8") || "{}");
+      } catch (e) {
+        prefixes = {};
+      }
     }
-    const usedPrefix = prefixes[subbot] || '.';
+    const usedPrefix = prefixes[subbotID] || ".";
 
-    // ─── Reacción ────────────────────────────────────────────────────
+    // ─── Reacción de entrada ─────────────────────────────────────
     await conn.sendMessage(msg.key.remoteJid, {
-      react: { text: '📜', key: msg.key }
+      react: { text: "📜", key: msg.key }
     });
 
-    // ─── Carga de menú custom ─────────────────────────────────────────
+    // ─── Carga de menú personalizado ─────────────────────────────
     let customData = {};
     if (fs.existsSync(menuF)) {
-      try { customData = JSON.parse(fs.readFileSync(menuF, 'utf8')||'{}'); }
-      catch { customData = {}; }
+      try {
+        customData = JSON.parse(fs.readFileSync(menuF, "utf8") || "{}");
+      } catch (e) {
+        customData = {};
+      }
     }
-    // aquí buscamos primero por subbotID y si no existe, usamos el jid de la conversación:
-    const personal = customData[subbot] || customData[msg.key.remoteJid] || null;
+    // busca por subbotID y si no existe, por el chat JID
+    const personal = customData[subbotID] || customData[msg.key.remoteJid] || null;
 
-    // ─── Imagen (base64 o URL por defecto) ────────────────────────────
-    let imageOpts = { url: 'https://cdn.russellxz.click/654e40ee.jpeg' };
+    // ─── Preparar imagen (base64 o URL) ───────────────────────────
+    const defaultUrl = "https://cdn.russellxz.click/654e40ee.jpeg";
+    let imageOpts   = { url: defaultUrl };
     if (personal?.imagen) {
       try {
-        imageOpts = { buffer: Buffer.from(personal.imagen, 'base64') };
-      } catch {}
+        imageOpts = { buffer: Buffer.from(personal.imagen, "base64") };
+      } catch (e) {
+        // si falla base64, sigue con defaultUrl
+      }
     }
-    const nombreMenu = personal?.nombre || 'Azura Ultra 2.0 Subbot';
 
-    // ─── Construcción del caption ────────────────────────────────────
+    const nombreMenu = personal?.nombre || "Azura Ultra 2.0 Subbot";
+
+    // ─── Construir caption ────────────────────────────────────────
     let caption;
     if (personal) {
       caption = `
@@ -203,25 +213,30 @@ const handler = async (msg, { conn }) => {
 `.trim();
     }
 
-    // ─── Envío ────────────────────────────────────────────────────────
-    await conn.sendMessage(msg.key.remoteJid, {
-      image: imageOpts,
-      caption
-    }, { quoted: msg });
+    // ─── Envío del menú ────────────────────────────────────────────
+    await conn.sendMessage(
+      msg.key.remoteJid,
+      {
+        image: imageOpts,
+        caption
+      },
+      { quoted: msg }
+    );
 
+    // ─── Reacción de salida ────────────────────────────────────────
     await conn.sendMessage(msg.key.remoteJid, {
-      react: { text: '✅', key: msg.key }
+      react: { text: "✅", key: msg.key }
     });
 
   } catch (err) {
-    console.error('❌ Error en menú:', err);
+    console.error("❌ Error en el menú:", err);
     try {
       await conn.sendMessage(msg.key.remoteJid, {
-        text: '❌ *Ocurrió un error mostrando el menú.*'
+        text: "❌ *Ocurrió un error mostrando el menú.*"
       }, { quoted: msg });
     } catch {}
   }
 };
 
-handler.command = ['menu','help','ayuda','comandos'];
+handler.command = ['menu', 'help', 'ayuda', 'comandos'];
 module.exports = handler;
