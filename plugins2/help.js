@@ -3,53 +3,45 @@ const path = require('path');
 
 const handler = async (msg, { conn }) => {
   try {
-    // ─── Obtengo ID y prefijo ─────────────────────────────────────────
+    // ─── Prefijo y IDs ────────────────────────────────────────────────
     const rawID   = conn.user?.id || '';
     const subbot  = rawID.split(':')[0] + '@s.whatsapp.net';
-    const prefFile = path.resolve(__dirname, 'prefixes.json');
-    const cfgFile  = path.resolve(__dirname, 'setmenu.json');
+    const cwd     = process.cwd();
+    const prefF   = path.join(cwd, 'prefixes.json');
+    const menuF   = path.join(cwd, 'setmenu.json');
 
+    // ─── Carga de prefijos ───────────────────────────────────────────
     let prefixes = {};
-    if (fs.existsSync(prefFile)) {
-      try {
-        prefixes = JSON.parse(fs.readFileSync(prefFile, 'utf-8') || '{}');
-      } catch {
-        console.warn('⚠️ prefixes.json inválido, usando “.”');
-        prefixes = {};
-      }
+    if (fs.existsSync(prefF)) {
+      try { prefixes = JSON.parse(fs.readFileSync(prefF, 'utf8')||'{}'); }
+      catch { prefixes = {}; }
     }
     const usedPrefix = prefixes[subbot] || '.';
 
-    // ─── Reacción inicial ─────────────────────────────────────────────
+    // ─── Reacción ────────────────────────────────────────────────────
     await conn.sendMessage(msg.key.remoteJid, {
       react: { text: '📜', key: msg.key }
     });
 
-    // ─── Cargo JSON de personalización ─────────────────────────────────
+    // ─── Carga de menú custom ─────────────────────────────────────────
     let customData = {};
-    if (fs.existsSync(cfgFile)) {
-      try {
-        customData = JSON.parse(fs.readFileSync(cfgFile, 'utf-8') || '{}');
-      } catch {
-        console.warn('⚠️ setmenu.json inválido, ignorando menú personalizado');
-        customData = {};
-      }
+    if (fs.existsSync(menuF)) {
+      try { customData = JSON.parse(fs.readFileSync(menuF, 'utf8')||'{}'); }
+      catch { customData = {}; }
     }
-    const personal = customData[subbot] || null;
+    // aquí buscamos primero por subbotID y si no existe, usamos el jid de la conversación:
+    const personal = customData[subbot] || customData[msg.key.remoteJid] || null;
 
-    // ─── Imagen (base64 o URL por defecto) ─────────────────────────────
+    // ─── Imagen (base64 o URL por defecto) ────────────────────────────
     let imageOpts = { url: 'https://cdn.russellxz.click/654e40ee.jpeg' };
     if (personal?.imagen) {
       try {
         imageOpts = { buffer: Buffer.from(personal.imagen, 'base64') };
-      } catch {
-        console.warn('⚠️ La imagen custom no es base64 válido');
-      }
+      } catch {}
     }
-
     const nombreMenu = personal?.nombre || 'Azura Ultra 2.0 Subbot';
 
-    // ─── Construyo el caption ──────────────────────────────────────────
+    // ─── Construcción del caption ────────────────────────────────────
     let caption;
     if (personal) {
       caption = `
@@ -111,9 +103,9 @@ const handler = async (msg, { conn }) => {
 ━━━━━━━━━━━━━━━━━━━━━━
 📍 TikTok: https://www.tiktok.com/@azuritabot?_t=ZT-8xpG3PgDQeT&_r=1
 🎨 𝗠𝗲𝗻𝘂́ 𝗽𝗲𝗿𝘀𝗼𝗻𝗮𝗹𝗶𝘇𝗮𝗱𝗼 𝗽𝗼𝗿 𝗲𝗹 𝘂𝘀𝘂𝗮𝗿𝗶𝗼  
+
 `.trim();
     } else {
-      // menú genérico si no hay personal
       caption = `
 ╔⌬ ${nombreMenu}⌬╗
 ║   Menú por categorías  
@@ -211,7 +203,7 @@ const handler = async (msg, { conn }) => {
 `.trim();
     }
 
-    // ─── Envío final ───────────────────────────────────────────────────
+    // ─── Envío ────────────────────────────────────────────────────────
     await conn.sendMessage(msg.key.remoteJid, {
       image: imageOpts,
       caption
@@ -220,8 +212,9 @@ const handler = async (msg, { conn }) => {
     await conn.sendMessage(msg.key.remoteJid, {
       react: { text: '✅', key: msg.key }
     });
+
   } catch (err) {
-    console.error('❌ Error en el menú:', err);
+    console.error('❌ Error en menú:', err);
     try {
       await conn.sendMessage(msg.key.remoteJid, {
         text: '❌ *Ocurrió un error mostrando el menú.*'
