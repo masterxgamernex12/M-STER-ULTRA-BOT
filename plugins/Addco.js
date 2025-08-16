@@ -10,7 +10,7 @@ const handler = async (msg, { conn, args }) => {
   const isOwner = global.owner.some(([id]) => id === senderNum);
   const isFromMe = msg.key.fromMe;
 
-  // Verificación de permisos (SIN cambios)
+  // Verificación de permisos
   if (isGroup && !isOwner && !isFromMe) {
     const metadata = await conn.groupMetadata(chatId);
     const participant = metadata.participants.find(p => p.id === senderId);
@@ -27,7 +27,7 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Verifica que se responda a un sticker (SIN cambios)
+  // Verifica que se responda a un sticker
   const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
   if (!quoted?.stickerMessage) {
     return conn.sendMessage(chatId, {
@@ -49,17 +49,12 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // ⬇️ ÚNICO CAMBIO: guardar en setwelcome.json → stickerCommands
-  const jsonPath = path.resolve("./setwelcome.json");
+  const jsonPath = path.resolve("./comandos.json");
   const data = fs.existsSync(jsonPath)
     ? JSON.parse(fs.readFileSync(jsonPath, "utf-8"))
     : {};
 
-  if (!data.stickerCommands || typeof data.stickerCommands !== "object") {
-    data.stickerCommands = {};
-  }
-
-  data.stickerCommands[fileSha] = comando; // guarda el comando tal cual (con o sin prefijo, como tú lo mandes)
+  data[fileSha] = comando;
   fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
 
   await conn.sendMessage(chatId, {
