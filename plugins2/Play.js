@@ -1,3 +1,4 @@
+// commands/play.js — Sky API (sin límites) + reacciones/respuestas
 const axios = require("axios");
 const yts = require("yt-search");
 const fs = require("fs");
@@ -7,8 +8,33 @@ const { promisify } = require("util");
 const { pipeline } = require("stream");
 const streamPipe = promisify(pipeline);
 
+// Sky API
+const API_BASE = process.env.API_BASE || "https://api-sky.ultraplus.click";
+const API_KEY  = process.env.API_KEY  || "Russellxz";
+
 // Almacena tareas pendientes por previewMessageId
 const pending = {};
+
+// --- helper Sky API ---
+async function skyYT(url, format) {
+  const { data, status } = await axios.get(`${API_BASE}/api/download/yt.php`, {
+    params: { url, format }, // 'audio' | 'video'
+    headers: { Authorization: `Bearer ${API_KEY}` },
+    timeout: 60000,
+    validateStatus: s => s >= 200 && s < 600
+  });
+  if (status !== 200 || !data || data.status !== "true" || !data.data) {
+    throw new Error(data?.error || `HTTP ${status}`);
+  }
+  return data.data; // { title, thumbnail, duration, audio?, video? }
+}
+
+// Utilidad: descarga a disco y devuelve ruta
+async function downloadToFile(url, filePath) {
+  const res = await axios.get(url, { responseType: "stream" });
+  await streamPipe(res.data, fs.createWriteStream(filePath));
+  return filePath;
+}
 
 module.exports = async (msg, { conn, text }) => {
   const subID = (conn.user.id || "").split(":")[0] + "@s.whatsapp.net";
@@ -24,7 +50,7 @@ module.exports = async (msg, { conn, text }) => {
   if (!text) {
     return conn.sendMessage(
       msg.key.remoteJid,
-      { text: `✳️ Usa:\n${pref}playpro <término>\nEj: *${pref}playpro* bad bunny diles` },
+      { text: `✳️ Usa:\n${pref}play <término>\nEj: *${pref}play* bad bunny diles` },
       { quoted: msg }
     );
   }
@@ -36,7 +62,7 @@ module.exports = async (msg, { conn, text }) => {
 
   // búsqueda
   const res = await yts(text);
-  const video = res.videos[0];
+  const video = res.videos?.[0];
   if (!video) {
     return conn.sendMessage(
       msg.key.remoteJid,
@@ -45,8 +71,8 @@ module.exports = async (msg, { conn, text }) => {
     );
   }
 
-  const { url: videoUrl, title, timestamp: duration, views, author } = video;
-  const viewsFmt = views.toLocaleString();
+  const { url: videoUrl, title, timestamp: duration, views, author, thumbnail } = video;
+  const viewsFmt = (views || 0).toLocaleString();
 
   const caption = `
 ╔═══════════════╗
@@ -57,27 +83,24 @@ module.exports = async (msg, { conn, text }) => {
 ├ 🎼 Título: ${title}
 ├ ⏱️ Duración: ${duration}
 ├ 👁️ Vistas: ${viewsFmt}
-├ 👤 Autor: ${author}
+├ 👤 Autor: ${author?.name || author || "Desconocido"}
 └ 🔗 Link: ${videoUrl}
 ╰───────────────╯
-📥 Opciones de Descarga reacione o responda el mensaje del bot🎮:
+📥 Opciones de Descarga (reacciona o responde):
 ┣ 👍 Audio MP3     (1 / audio)
 ┣ ❤️ Video MP4     (2 / video)
 ┣ 📄 Audio Doc     (4 / audiodoc)
 ┗ 📁 Video Doc     (3 / videodoc)
 
-📦 Si usas termux o no estás en Sky Ultra Plus:
-┣ 🎵 ${pref}play5 ${text}
-┣ 🎥 ${pref}play6 ${text}
-┗ ⚠️ ${pref}ff
+✦ Source: api-sky.ultraplus.click
 ═════════════════════
-   𖥔 Azura SUBBOTS𖥔
+   𖥔 Azura SUBBOTS 𖥔
 ═════════════════════`.trim();
 
   // envía preview
   const preview = await conn.sendMessage(
     msg.key.remoteJid,
-    { image: { url: video.thumbnail }, caption },
+    { image: { url: thumbnail }, caption },
     { quoted: msg }
   );
 
@@ -109,7 +132,7 @@ module.exports = async (msg, { conn, text }) => {
           }
         }
 
-        // 2) RESPUESTAS CITADAS
+        // 2) RESPUESTAS CITADAS (1/2/3/4)
         try {
           const context = m.message?.extendedTextMessage?.contextInfo;
           const citado = context?.stanzaId;
@@ -173,49 +196,76 @@ async function handleDownload(conn, job, choice, quotedMsg) {
 
 async function downloadAudio(conn, job, asDocument, quoted) {
   const { chatId, videoUrl, title } = job;
-  const api = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
-  const res = await axios.get(api);
-  if (!res.data?.status || !res.data.data?.url) throw new Error("No se pudo obtener el audio");
+
+  // Sky API (audio)
+  const d = await skyYT(videoUrl, "audio");
+  const mediaUrl = d.audio || d.video; // fallback si upstream solo da video
+  if (!mediaUrl) throw new Error("No se pudo obtener audio");
+
+  // Descarga + (si no es mp3) convertir a MP3
   const tmp = path.join(__dirname, "../tmp");
-  if (!fs.existsSync(tmp)) fs.mkdirSync(tmp);
-  const inFile = path.join(tmp, `${Date.now()}_in.m4a`);
-  const outFile = path.join(tmp, `${Date.now()}_out.mp3`);
-  const download = await axios.get(res.data.data.url, { responseType: "stream" });
-  await streamPipe(download.data, fs.createWriteStream(inFile));
-  await new Promise((r, e) => ffmpeg(inFile).audioCodec("libmp3lame").audioBitrate("128k").format("mp3").save(outFile).on("end", r).on("error", e));
+  if (!fs.existsSync(tmp)) fs.mkdirSync(tmp, { recursive: true });
+
+  const urlPath = new URL(mediaUrl).pathname || "";
+  const ext = (urlPath.split(".").pop() || "bin").toLowerCase();
+  const isMp3 = ext === "mp3";
+
+  const inFile  = path.join(tmp, `${Date.now()}_in.${ext}`);
+  await downloadToFile(mediaUrl, inFile);
+
+  let outFile = inFile;
+  if (!isMp3) {
+    const tryOut = path.join(tmp, `${Date.now()}_out.mp3`);
+    try {
+      await new Promise((resolve, reject) =>
+        ffmpeg(inFile)
+          .audioCodec("libmp3lame")
+          .audioBitrate("128k")
+          .format("mp3")
+          .save(tryOut)
+          .on("end", resolve)
+          .on("error", reject)
+      );
+      outFile = tryOut;
+      try { fs.unlinkSync(inFile); } catch {}
+    } catch {
+      outFile = inFile; // si falla la conversión, enviamos el original
+    }
+  }
+
   const buffer = fs.readFileSync(outFile);
   await conn.sendMessage(chatId, {
     [asDocument ? "document" : "audio"]: buffer,
     mimetype: "audio/mpeg",
     fileName: `${title}.mp3`
   }, { quoted });
-  fs.unlinkSync(inFile);
-  fs.unlinkSync(outFile);
+
+  try { fs.unlinkSync(outFile); } catch {}
 }
 
 async function downloadVideo(conn, job, asDocument, quoted) {
   const { chatId, videoUrl, title } = job;
-  const qualities = ["720p","480p","360p"];
-  let url = null;
-  for (let q of qualities) {
-    try {
-      const r = await axios.get(`https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=video&quality=${q}&apikey=russellxz`);
-      if (r.data?.status && r.data.data?.url) { url = r.data.data.url; break; }
-    } catch {}
-  }
-  if (!url) throw new Error("No se pudo obtener el video");
+
+  // Sky API (video)
+  const d = await skyYT(videoUrl, "video");
+  const mediaUrl = d.video || d.audio; // fallback
+  if (!mediaUrl) throw new Error("No se pudo obtener video");
+
+  // Descarga
   const tmp = path.join(__dirname, "../tmp");
-  if (!fs.existsSync(tmp)) fs.mkdirSync(tmp);
+  if (!fs.existsSync(tmp)) fs.mkdirSync(tmp, { recursive: true });
   const file = path.join(tmp, `${Date.now()}_vid.mp4`);
-  const dl = await axios.get(url, { responseType: "stream" });
-  await streamPipe(dl.data, fs.createWriteStream(file));
+  await downloadToFile(mediaUrl, file);
+
+  // Enviar (SIN límite propio)
   await conn.sendMessage(chatId, {
     [asDocument ? "document" : "video"]: fs.readFileSync(file),
     mimetype: "video/mp4",
     fileName: `${title}.mp4`,
-    caption: asDocument ? undefined : `🎬 Aquí tiene su video.\n© Azura Ultra`
+    caption: asDocument ? undefined : `🎬 Aquí tiene su video.\n✦ Source: api-sky.ultraplus.click\n© Azura SUBBOTS`
   }, { quoted });
-  fs.unlinkSync(file);
+
+  try { fs.unlinkSync(file); } catch {}
 }
 
 module.exports.command = ["play"];
