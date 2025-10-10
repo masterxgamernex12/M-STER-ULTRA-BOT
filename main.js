@@ -14756,16 +14756,15 @@ case "tt":
         });
     }
     break;
-
 case "facebook":
 case "fb":
     if (!text) return sock.sendMessage(msg.key.remoteJid, { 
-        text: `Ejemplo de uso:\n${global.prefix + command} https://fb.watch/ncowLHMp-x/` 
+        text: `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n📌 *Ejemplo de uso:*\n${global.prefix + command} https://fb.watch/ncowLHMp-x/\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦` 
     }, { quoted: msg });
 
     if (!text.match(/www.facebook.com|fb.watch/g)) {
         return sock.sendMessage(msg.key.remoteJid, {
-            text: `❌ Enlace de Facebook inválido.\nEjemplo de uso:\n${global.prefix + command} https://fb.watch/ncowLHMp-x/`
+            text: `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n❌ *Enlace de Facebook inválido.*\n📌 *Ejemplo de uso:*\n${global.prefix + command} https://fb.watch/ncowLHMp-x/\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`
         });
     }
 
@@ -14778,24 +14777,58 @@ case "fb":
         const axios = require('axios');
         const fs = require('fs');
         const path = require('path');
-        const response = await axios.get(`https://api.dorratz.com/fbvideo?url=${encodeURIComponent(text)}`);
-        const results = response.data;
 
-        if (!results || results.length === 0 || !results[0].url) {
-            return sock.sendMessage(msg.key.remoteJid, { text: "❌ No se pudo obtener el video." });
+        // ==== CONFIG DE TU API SKY ====
+        const API_BASE = process.env.API_BASE || "https://api-sky.ultraplus.click";
+        const API_KEY  = process.env.API_KEY  || "Russellxz";
+
+        // Llamar a tu API de Facebook
+        const response = await axios.get(`${API_BASE}/api/download/facebook`, {
+            params: { url: text },
+            headers: { 
+                Authorization: `Bearer ${API_KEY}`,
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+            },
+            timeout: 30000
+        });
+
+        if (!response.data || response.data.status !== "true" || !response.data.data) {
+            throw new Error("La API de Sky no devolvió datos válidos.");
+        }
+
+        const videoData = response.data.data;
+        const videoUrlHD = videoData.video_hd;
+        const videoUrlSD = videoData.video_sd;
+        const videoTitle = videoData.title || "Sin título";
+        const videoThumbnail = videoData.thumbnail;
+        const videoDuration = videoData.duration ? `${videoData.duration} segundos` : "No especificado";
+        const soliRemaining = response.data.soli_remaining || 0;
+
+        // Preferir HD, si no existe usar SD
+        const videoUrl = videoUrlHD || videoUrlSD;
+
+        if (!videoUrl) {
+            throw new Error("No se pudo obtener el video de Facebook.");
         }
 
         // Asegurar carpeta tmp
         const tmpDir = path.resolve('./tmp');
-        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
+        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
-        const videoUrl = results[0].url;
         const filePath = path.join(tmpDir, `fb-${Date.now()}.mp4`);
 
-        // Descargar y guardar
-        const videoRes = await axios.get(videoUrl, { responseType: 'stream' });
-        const writer = fs.createWriteStream(filePath);
+        // Descargar y guardar el video
+        const videoRes = await axios.get(videoUrl, { 
+            responseType: 'stream',
+            timeout: 45000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+                'Referer': 'https://www.facebook.com/',
+                'Accept': '*/*'
+            }
+        });
 
+        const writer = fs.createWriteStream(filePath);
         await new Promise((resolve, reject) => {
             videoRes.data.pipe(writer);
             writer.on("finish", resolve);
@@ -14808,20 +14841,45 @@ case "fb":
         if (sizeMB > 99) {
             fs.unlinkSync(filePath);
             return sock.sendMessage(msg.key.remoteJid, {
-                text: `❌ El archivo pesa ${sizeMB.toFixed(2)}MB y excede el límite de 99MB.\n\n🔒 Solo se permiten descargas menores a 99MB para no saturar los servidores.`
+                text: `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n❌ El archivo pesa ${sizeMB.toFixed(2)}MB y excede el límite de 99MB.\n\n🔒 Solo se permiten descargas menores a 99MB para no saturar los servidores.\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`
             }, { quoted: msg });
         }
 
-        // 📜 Construcción del mensaje con resoluciones disponibles
-        const message = `Resoluciones disponibles:\n${results.map((res) => `- ${res.resolution}`).join('\n')}\n\n🔥 Enviado en 720p\n\n> 🍧 Solicitud procesada por api.dorratz.com\n\n───────\n© Azura Ultra`;
+        // 📜 Construcción del mensaje
+        const message = `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦
 
-        // 📩 Enviar el video como normal
+📀 𝙸𝚗𝚏𝚘 𝚍𝚎𝚕 𝚟𝚒𝚍𝚎𝚘:
+❥ 𝑻𝒊𝒕𝒖𝒍𝒐: ${videoTitle}
+❥ 𝑫𝒖𝒓𝒂𝒄𝒊𝒐𝒏: ${videoDuration}
+❥ 𝑪𝒂𝒍𝒊𝒅𝒂𝒅: ${videoUrlHD ? "HD (720p)" : "SD (360p)"}
+❥ 𝑺𝒐𝒍𝒊 𝒓𝒆𝒔𝒕𝒂𝒏𝒕𝒆𝒔: ${soliRemaining}
+
+🎬 𝑹𝒆𝒔𝒐𝒍𝒖𝒄𝒊𝒐𝒏𝒆𝒔 𝒅𝒊𝒔𝒑𝒐𝒏𝒊𝒃𝒍𝒆𝒔:
+☛ ${videoUrlHD ? "🎯 HD (720p) - Enviado" : "❌ HD No disponible"}
+☛ ${videoUrlSD ? "📱 SD (360p)" : "❌ SD No disponible"}
+
+🔧 API: api-sky.ultraplus.click
+
+❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`.trim();
+
+        // 📩 Enviar el video
         await sock.sendMessage(msg.key.remoteJid, {
             video: fs.readFileSync(filePath),
             mimetype: 'video/mp4',
-            caption: message
+            caption: message,
+            contextInfo: {
+                externalAdReply: {
+                    title: `Video de Facebook`,
+                    body: videoTitle.substring(0, 60) + (videoTitle.length > 60 ? '...' : ''),
+                    thumbnailUrl: videoThumbnail,
+                    sourceUrl: text,
+                    mediaType: 1,
+                    renderLargerThumbnail: true
+                }
+            }
         }, { quoted: msg });
 
+        // Eliminar archivo temporal
         fs.unlinkSync(filePath);
 
         // ✅ Confirmación con reacción de éxito
@@ -14830,13 +14888,34 @@ case "fb":
         });
 
     } catch (error) {
-        console.error(error);
-        await sock.sendMessage(msg.key.remoteJid, {
-            text: "❌ Ocurrió un error al procesar el enlace de Facebook."
+        console.error("❌ Error en el comando .facebook:", error.message);
+        
+        let errorMsg = `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n❌ *Ocurrió un error al procesar el enlace de Facebook.*\n`;
+        
+        if (error.response?.status === 401) {
+            errorMsg += "🔹 *Error de autenticación en la API.*\n🔹 Verifica tu API Key.";
+        } else if (error.response?.status === 402) {
+            errorMsg += "🔹 *No tienes suficientes soli.*\n🔹 Recarga tus créditos para continuar.";
+        } else if (error.code === 'ECONNABORTED') {
+            errorMsg += "🔹 *Tiempo de espera agotado.*\n🔹 El servidor tardó demasiado en responder.";
+        } else if (error.message.includes('API inválida')) {
+            errorMsg += "🔹 *Error en la API de Sky.*\n🔹 Inténtalo más tarde.";
+        } else if (error.message.includes('No se pudo obtener')) {
+            errorMsg += "🔹 *No se pudo descargar el video.*\n🔹 El enlace puede ser privado o inválido.";
+        }
+        
+        errorMsg += "\n\n🔹 _Inténtalo más tarde._\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦";
+
+        await sock.sendMessage(msg.key.remoteJid, { 
+            text: errorMsg
+        }, { quoted: msg });
+
+        // ❌ Reacción de error
+        await sock.sendMessage(msg.key.remoteJid, { 
+            react: { text: "❌", key: msg.key } 
         });
     }
     break;
-    }
 }
         
 
