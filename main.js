@@ -14783,7 +14783,7 @@ case "fb":
         const API_KEY  = process.env.API_KEY  || "Russellxz";
 
         // Llamar a tu API de Facebook
-        const response = await axios.get(`${API_BASE}/api/download/facebook`, {
+        const response = await axios.get(`${API_BASE}/api/download/facebook.js`, {
             params: { url: text },
             headers: { 
                 Authorization: `Bearer ${API_KEY}`,
