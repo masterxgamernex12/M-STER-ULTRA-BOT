@@ -14600,7 +14600,7 @@ case "ig":
         }, { quoted: msg });
     }
     break;
-
+        
 case "tiktok":
 case "tt":
     if (!text) {
@@ -14624,27 +14624,57 @@ case "tt":
         const axios = require('axios');
         const fs = require('fs');
         const path = require('path');
-        const response = await axios.get(`https://api.dorratz.com/v2/tiktok-dl?url=${args[0]}`);
 
-        if (!response.data || !response.data.data || !response.data.data.media) {
-            throw new Error("La API no devolvió un video válido.");
+        // ==== CONFIG DE TU API SKY ====
+        const API_BASE = process.env.API_BASE || "https://api-sky.ultraplus.click";
+        const API_KEY  = process.env.API_KEY  || "Russellxz";
+
+        // Llamar a tu API de TikTok
+        const response = await axios.get(`${API_BASE}/api/download/tiktok`, {
+            params: { url: args[0] },
+            headers: { 
+                Authorization: `Bearer ${API_KEY}`,
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+            },
+            timeout: 30000
+        });
+
+        if (!response.data || response.data.status !== "true" || !response.data.data) {
+            throw new Error("La API de Sky no devolvió datos válidos.");
         }
 
         const videoData = response.data.data;
-        const videoUrl = videoData.media.org;
+        const videoUrl = videoData.video;
         const videoTitle = videoData.title || "Sin título";
-        const videoAuthor = videoData.author.nickname || "Desconocido";
+        const videoAuthor = videoData.author?.name || "Desconocido";
+        const videoUsername = videoData.author?.username || "";
         const videoDuration = videoData.duration ? `${videoData.duration} segundos` : "No especificado";
-        const videoLikes = videoData.like || "0";
-        const videoComments = videoData.comment || "0";
+        const videoLikes = videoData.likes?.toLocaleString() || "0";
+        const videoComments = videoData.comments?.toLocaleString() || "0";
+        const videoShares = videoData.shares?.toLocaleString() || "0";
+        const videoViews = videoData.views?.toLocaleString() || "0";
+        const soliRemaining = response.data.soli_remaining || 0;
+
+        if (!videoUrl) {
+            throw new Error("No se pudo obtener el video de TikTok.");
+        }
 
         // Asegurar carpeta ./tmp
         const tmpDir = path.resolve('./tmp');
-        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
+        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
         const filePath = path.join(tmpDir, `tt-${Date.now()}.mp4`);
 
-        // Descargar y guardar
-        const videoRes = await axios.get(videoUrl, { responseType: 'stream' });
+        // Descargar y guardar el video
+        const videoRes = await axios.get(videoUrl, { 
+            responseType: 'stream',
+            timeout: 45000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+                'Referer': 'https://www.tiktok.com/',
+                'Accept': '*/*'
+            }
+        });
+
         const writer = fs.createWriteStream(filePath);
         await new Promise((resolve, reject) => {
             videoRes.data.pipe(writer);
@@ -14652,7 +14682,7 @@ case "tt":
             writer.on("error", reject);
         });
 
-        // Verificar tamaño
+        // Verificar tamaño del archivo
         const stats = fs.statSync(filePath);
         const sizeMB = stats.size / (1024 * 1024);
         if (sizeMB > 99) {
@@ -14665,20 +14695,34 @@ case "tt":
         // 📜 Mensaje con la información del video
         let mensaje = `🎥 *Video de TikTok* 🎥\n\n`;
         mensaje += `📌 *Título:* ${videoTitle}\n`;
-        mensaje += `👤 *Autor:* ${videoAuthor}\n`;
-        mensaje += `⏱️ *Duración:* ${videoDuration}\n`;
-        mensaje += `❤️ *Likes:* ${videoLikes} | 💬 *Comentarios:* ${videoComments}\n\n`;
-        mensaje += `───────\n🍧 *API utilizada:* https://api.dorratz.com\n`;
-        mensaje += `© Azura Ultra`;
+        mensaje += `👤 *Autor:* ${videoAuthor}`;
+        if (videoUsername) mensaje += ` (@${videoUsername})`;
+        mensaje += `\n⏱️ *Duración:* ${videoDuration}\n`;
+        mensaje += `❤️ *Likes:* ${videoLikes} | 💬 *Comentarios:* ${videoComments}\n`;
+        mensaje += `🔄 *Compartidos:* ${videoShares} | 👀 *Vistas:* ${videoViews}\n`;
+        mensaje += `🎫 *Soli restantes:* ${soliRemaining}\n\n`;
+        mensaje += `───────\n🍧 *API utilizada:* ${API_BASE}\n`;
+        mensaje += `© La Suki Bot`;
 
         // 📩 Enviar video
         await sock.sendMessage(msg.key.remoteJid, {
             video: fs.readFileSync(filePath),
             mimetype: 'video/mp4',
-            caption: mensaje
+            caption: mensaje,
+            contextInfo: {
+                externalAdReply: {
+                    title: `TikTok de ${videoAuthor}`,
+                    body: videoTitle.substring(0, 60) + (videoTitle.length > 60 ? '...' : ''),
+                    thumbnailUrl: videoData.thumbnail,
+                    sourceUrl: args[0],
+                    mediaType: 1,
+                    renderLargerThumbnail: true
+                }
+            }
         }, { quoted: msg });
 
-        fs.unlinkSync(filePath); // eliminar temporal
+        // Eliminar archivo temporal
+        fs.unlinkSync(filePath);
 
         // ✅ Reacción de éxito
         await sock.sendMessage(msg.key.remoteJid, { 
@@ -14687,8 +14731,23 @@ case "tt":
 
     } catch (error) {
         console.error("❌ Error en el comando .tiktok:", error.message);
+        
+        let errorMsg = "❌ *Ocurrió un error al procesar el enlace de TikTok.*\n";
+        
+        if (error.response?.status === 401) {
+            errorMsg = "❌ *Error de autenticación en la API.*\n🔹 Verifica tu API Key.";
+        } else if (error.response?.status === 402) {
+            errorMsg = "❌ *No tienes suficientes soli.*\n🔹 Recarga tus créditos para continuar.";
+        } else if (error.code === 'ECONNABORTED') {
+            errorMsg = "❌ *Tiempo de espera agotado.*\n🔹 El servidor tardó demasiado en responder.";
+        } else if (error.message.includes('API inválida')) {
+            errorMsg = "❌ *Error en la API de Sky.*\n🔹 Inténtalo más tarde.";
+        }
+        
+        errorMsg += "\n🔹 _Inténtalo más tarde._";
+
         await sock.sendMessage(msg.key.remoteJid, { 
-            text: "❌ *Ocurrió un error al procesar el enlace de TikTok.*\n🔹 _Inténtalo más tarde._" 
+            text: errorMsg
         }, { quoted: msg });
 
         // ❌ Reacción de error
@@ -14696,10 +14755,7 @@ case "tt":
             react: { text: "❌", key: msg.key } 
         });
     }
-    break;        
-
-        
-
+    break;
 
 case "facebook":
 case "fb":
