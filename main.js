@@ -1421,118 +1421,7 @@ case "git": {
 }
 
 
-case 'ytmp4': {
-    const axios = require('axios');
-    const fs = require('fs');
-    const path = require('path');
-    const { pipeline } = require('stream');
-    const { promisify } = require('util');
-    const streamPipeline = promisify(pipeline);
 
-    if (!text || (!text.includes('youtube.com') && !text.includes('youtu.be'))) {
-        await sock.sendMessage(msg.key.remoteJid, {
-            text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${global.prefix}ytmp4* https://youtube.com/watch?v=...`
-        }, { quoted: msg });
-        break;
-    }
-
-    await sock.sendMessage(msg.key.remoteJid, {
-        react: { text: '⏳', key: msg.key }
-    });
-
-    try {
-        const qualities = ['720p', '480p', '360p'];
-        let videoData = null;
-
-        for (let quality of qualities) {
-            try {
-                const apiUrl = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(text)}&type=video&quality=${quality}&apikey=russellxz`;
-                const response = await axios.get(apiUrl);
-                if (response.data?.status && response.data?.data?.url) {
-                    videoData = {
-                        url: response.data.data.url,
-                        title: response.data.title || 'video',
-                        thumbnail: response.data.thumbnail,
-                        duration: response.data.fduration,
-                        views: response.data.views,
-                        channel: response.data.channel,
-                        quality: response.data.data.quality || quality,
-                        size: response.data.data.size || 'Desconocido',
-                        publish: response.data.publish || 'Desconocido',
-                        id: response.data.id || ''
-                    };
-                    break;
-                }
-            } catch { continue; }
-        }
-
-        if (!videoData) throw new Error('No se pudo obtener el video en ninguna calidad Talvez excede el límite de 99MB');
-
-        const tmpDir = path.join(__dirname, 'tmp');
-        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
-
-        const filePath = path.join(tmpDir, `${Date.now()}_video.mp4`);
-
-        // Descargar el video directamente
-        const response = await axios.get(videoData.url, {
-            responseType: 'stream',
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-        });
-        await streamPipeline(response.data, fs.createWriteStream(filePath));
-
-        // Verificar si el archivo tiene buen tamaño
-        const stats = fs.statSync(filePath);
-        if (!stats || stats.size < 100000) {
-            fs.unlinkSync(filePath);
-            throw new Error('El video descargado está vacío o incompleto');
-        }
-
-        const caption = `
-╔═════════════════╗
-║✦ 𝘼𝙕𝙐𝙍𝘼 𝙐𝙇𝙏𝙍𝘼 𝟮.𝟬 𝗕𝗢𝗧 ✦
-╚═════════════════╝
-
-📀 *𝙄𝙣𝙛𝙤 𝙙𝙚𝙡 𝙫𝙞𝙙𝙚𝙤:*  
-╭───────────────╮  
-├ 🎼 *Título:* ${videoData.title}
-├ ⏱️ *Duración:* ${videoData.duration}
-├ 👁️ *Vistas:* ${videoData.views}
-├ 👤 *Canal:* ${videoData.channel}
-├ 🗓️ *Publicado:* ${videoData.publish}
-├ 📦 *Tamaño:* ${videoData.size}
-├ 📹 *Calidad:* ${videoData.quality}
-└ 🔗 *Link:* https://youtu.be/${videoData.id}
-╰───────────────╯
-┗ ⚠️ *¿No se reproduce?* Usa _${global.prefix}ff_
-
-⏳ *Procesado por Azura Ultra*`;
-
-        await sock.sendMessage(msg.key.remoteJid, {
-            video: fs.readFileSync(filePath),
-            mimetype: 'video/mp4',
-            fileName: `${videoData.title}.mp4`,
-            caption,
-            gifPlayback: false
-        }, { quoted: msg });
-
-        fs.unlinkSync(filePath);
-
-        await sock.sendMessage(msg.key.remoteJid, {
-            react: { text: '✅', key: msg.key }
-        });
-
-    } catch (err) {
-        console.error(err);
-        await sock.sendMessage(msg.key.remoteJid, {
-            text: `❌ *Error:* ${err.message}`
-        }, { quoted: msg });
-        await sock.sendMessage(msg.key.remoteJid, {
-            react: { text: '❌', key: msg.key }
-        });
-    }
-
-    break;
-}
 
       
       
@@ -1647,14 +1536,12 @@ case 'ytmp3': {
   const axios = require('axios');
   const fs = require('fs');
   const path = require('path');
-  const ffmpeg = require('fluent-ffmpeg');
-  const { PassThrough } = require('stream');
 
   const isYoutubeUrl = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|music\.youtube\.com)\//i.test(text);
 
   if (!text || !isYoutubeUrl) {
     await sock.sendMessage(msg.key.remoteJid, {
-      text: `✳️ Usa el comando correctamente, mi rey:\n\n📌 Ejemplo: *${global.prefix}ytmp3* https://music.youtube.com/watch?v=abc123`
+      text: `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n✳️ *Ejemplo de uso:*\n${global.prefix}ytmp3 https://youtu.be/gwTf7idM2qc\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`
     }, { quoted: msg });
     break;
   }
@@ -1664,64 +1551,267 @@ case 'ytmp3': {
   });
 
   try {
-    const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(text)}&type=audio&quality=128kbps&apikey=russellxz`;
-    const res = await axios.get(apiURL);
-    const json = res.data;
+    // ==== CONFIG DE TU API SKY ====
+    const API_BASE = process.env.API_BASE || "https://api-sky.ultraplus.click";
+    const API_KEY  = process.env.API_KEY  || "Russellxz";
 
-    if (!json.status || !json.data?.url) {
-      throw new Error("No se pudo obtener el audio");
+    // Llamar a tu API de YouTube para audio
+    const response = await axios.get(`${API_BASE}/api/download/yt.js`, {
+      params: { 
+        url: text,
+        format: 'audio'
+      },
+      headers: { 
+        Authorization: `Bearer ${API_KEY}`,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+      },
+      timeout: 30000
+    });
+
+    if (!response.data || response.data.status !== "true" || !response.data.data) {
+      throw new Error("La API de Sky no devolvió datos válidos.");
     }
 
-    const { data, title, fduration, thumbnail } = json;
-    const sizeMBFromApi = parseFloat(data.size);
+    const videoData = response.data.data;
+    const audioUrl = videoData.audio || videoData.video;
+    const videoTitle = videoData.title || "Sin título";
+    const videoThumbnail = videoData.thumbnail;
+    const videoDuration = videoData.duration ? `${videoData.duration} segundos` : "No especificado";
+    const soliRemaining = response.data.soli_remaining || 0;
 
-    if (sizeMBFromApi > 99) {
+    if (!audioUrl) {
+      throw new Error("No se pudo obtener el audio.");
+    }
+
+    // Asegurar carpeta tmp
+    const tmpDir = path.resolve('./tmp');
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+
+    const filePath = path.join(tmpDir, `ytmp3-${Date.now()}.mp3`);
+
+    // Descargar el audio
+    const audioRes = await axios.get(audioUrl, { 
+      responseType: 'stream',
+      timeout: 45000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+        'Referer': 'https://www.youtube.com/',
+        'Accept': '*/*'
+      }
+    });
+
+    const writer = fs.createWriteStream(filePath);
+    await new Promise((resolve, reject) => {
+      audioRes.data.pipe(writer);
+      writer.on("finish", resolve);
+      writer.on("error", reject);
+    });
+
+    const stats = fs.statSync(filePath);
+    const sizeMB = stats.size / (1024 * 1024);
+
+    if (sizeMB > 99) {
+      fs.unlinkSync(filePath);
       return await sock.sendMessage(msg.key.remoteJid, {
-        text: `❌ El audio pesa ${sizeMBFromApi.toFixed(2)}MB y excede el límite de 99MB.\n\n🔒 Solo se permiten descargas menores a 99MB para no saturar los servidores.`
+        text: `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n❌ El audio pesa ${sizeMB.toFixed(2)}MB y excede el límite de 99MB.\n\n🔒 Solo se permiten descargas menores a 99MB.\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`
       }, { quoted: msg });
     }
 
+    // 📜 Mensaje informativo
+    const caption = `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦
+
+📀 𝙸𝚗𝚏𝚘 𝚍𝚎𝚕 𝚊𝚞𝚍𝚒𝚘:
+❥ 𝑻𝒊𝒕𝒖𝒍𝒐: ${videoTitle}
+❥ 𝑫𝒖𝒓𝒂𝒄𝒊𝒐𝒏: ${videoDuration}
+❥ 𝑻𝒂𝒎𝒂𝒏̃𝒐: ${sizeMB.toFixed(2)}MB
+❥ 𝑺𝒐𝒍𝒊 𝒓𝒆𝒔𝒕𝒂𝒏𝒕𝒆𝒔: ${soliRemaining}
+
+🔧 API: api-sky.ultraplus.click
+
+❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`.trim();
+
+    // Enviar el audio
     await sock.sendMessage(msg.key.remoteJid, {
-      image: { url: thumbnail },
-      caption: `🎧 *Título:* ${title}\n🕒 *Duración:* ${fduration}\n📥 *Tamaño:* ${sizeMBFromApi.toFixed(2)}MB\n\n⏳ Procesando audio...`
+      audio: fs.readFileSync(filePath),
+      mimetype: 'audio/mpeg',
+      fileName: `${videoTitle}.mp3`,
+      caption: caption
     }, { quoted: msg });
 
-    const response = await axios.get(data.url, { responseType: 'stream' });
-    const streamInput = new PassThrough();
-    const buffers = [];
+    // Eliminar archivo temporal
+    fs.unlinkSync(filePath);
 
-    // Procesar el stream con ffmpeg
-    ffmpeg(response.data)
-      .audioCodec('libmp3lame')
-      .audioBitrate('128k')
-      .format('mp3')
-      .on('error', err => {
-        console.error(err);
-        sock.sendMessage(msg.key.remoteJid, {
-          text: `❌ Error procesando audio Talvez excede el límite de 99MB: ${err.message}`
-        }, { quoted: msg });
-      })
-      .on('end', async () => {
-        const finalBuffer = Buffer.concat(buffers);
-        await sock.sendMessage(msg.key.remoteJid, {
-          audio: finalBuffer,
-          mimetype: 'audio/mpeg',
-          fileName: `${title}.mp3`
-        }, { quoted: msg });
-
-        await sock.sendMessage(msg.key.remoteJid, {
-          react: { text: '✅', key: msg.key }
-        });
-      })
-      .pipe(streamInput);
-
-    // Acumular chunks en buffer para enviar sin archivo
-    streamInput.on('data', chunk => buffers.push(chunk));
-
-  } catch (err) {
-    console.error(err);
+    // ✅ Reacción de éxito
     await sock.sendMessage(msg.key.remoteJid, {
-      text: `❌ *Error:* ${err.message}`
+      react: { text: '✅', key: msg.key }
+    });
+
+  } catch (error) {
+    console.error("❌ Error en ytmp3:", error.message);
+    
+    let errorMsg = `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n❌ *Error al procesar el audio:*\n`;
+    
+    if (error.response?.status === 401) {
+      errorMsg += "🔹 *Error de autenticación en la API.*\n🔹 Verifica tu API Key.";
+    } else if (error.response?.status === 402) {
+      errorMsg += "🔹 *No tienes suficientes soli.*\n🔹 Recarga tus créditos.";
+    } else if (error.code === 'ECONNABORTED') {
+      errorMsg += "🔹 *Tiempo de espera agotado.*\n🔹 El servidor tardó demasiado.";
+    } else if (error.message.includes('API inválida')) {
+      errorMsg += "🔹 *Error en la API de Sky.*\n🔹 Inténtalo más tarde.";
+    } else if (error.message.includes('No se pudo obtener')) {
+      errorMsg += "🔹 *No se pudo descargar el audio.*\n🔹 Verifica el enlace.";
+    }
+    
+    errorMsg += "\n\n🔹 _Inténtalo más tarde._\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦";
+
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: errorMsg
+    }, { quoted: msg });
+
+    await sock.sendMessage(msg.key.remoteJid, {
+      react: { text: '❌', key: msg.key }
+    });
+  }
+
+  break;
+}
+
+case 'ytmp4': {
+  const axios = require('axios');
+  const fs = require('fs');
+  const path = require('path');
+
+  const isYoutubeUrl = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|music\.youtube\.com)\//i.test(text);
+
+  if (!text || !isYoutubeUrl) {
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n✳️ *Ejemplo de uso:*\n${global.prefix}ytmp4 https://youtu.be/gwTf7idM2qc\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`
+    }, { quoted: msg });
+    break;
+  }
+
+  await sock.sendMessage(msg.key.remoteJid, {
+    react: { text: '⏳', key: msg.key }
+  });
+
+  try {
+    // ==== CONFIG DE TU API SKY ====
+    const API_BASE = process.env.API_BASE || "https://api-sky.ultraplus.click";
+    const API_KEY  = process.env.API_KEY  || "Russellxz";
+
+    // Llamar a tu API de YouTube para video
+    const response = await axios.get(`${API_BASE}/api/download/yt.js`, {
+      params: { 
+        url: text,
+        format: 'video'
+      },
+      headers: { 
+        Authorization: `Bearer ${API_KEY}`,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+      },
+      timeout: 30000
+    });
+
+    if (!response.data || response.data.status !== "true" || !response.data.data) {
+      throw new Error("La API de Sky no devolvió datos válidos.");
+    }
+
+    const videoData = response.data.data;
+    const videoUrl = videoData.video || videoData.audio;
+    const videoTitle = videoData.title || "Sin título";
+    const videoThumbnail = videoData.thumbnail;
+    const videoDuration = videoData.duration ? `${videoData.duration} segundos` : "No especificado";
+    const soliRemaining = response.data.soli_remaining || 0;
+
+    if (!videoUrl) {
+      throw new Error("No se pudo obtener el video.");
+    }
+
+    // Asegurar carpeta tmp
+    const tmpDir = path.resolve('./tmp');
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+
+    const filePath = path.join(tmpDir, `ytmp4-${Date.now()}.mp4`);
+
+    // Descargar el video
+    const videoRes = await axios.get(videoUrl, { 
+      responseType: 'stream',
+      timeout: 60000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+        'Referer': 'https://www.youtube.com/',
+        'Accept': '*/*'
+      }
+    });
+
+    const writer = fs.createWriteStream(filePath);
+    await new Promise((resolve, reject) => {
+      videoRes.data.pipe(writer);
+      writer.on("finish", resolve);
+      writer.on("error", reject);
+    });
+
+    const stats = fs.statSync(filePath);
+    const sizeMB = stats.size / (1024 * 1024);
+
+    if (sizeMB > 99) {
+      fs.unlinkSync(filePath);
+      return await sock.sendMessage(msg.key.remoteJid, {
+        text: `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n❌ El video pesa ${sizeMB.toFixed(2)}MB y excede el límite de 99MB.\n\n🔒 Solo se permiten descargas menores a 99MB.\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`
+      }, { quoted: msg });
+    }
+
+    // 📜 Mensaje informativo
+    const caption = `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦
+
+📀 𝙸𝚗𝚏𝚘 𝚍𝚎𝚕 𝚟𝚒𝚍𝚎𝚘:
+❥ 𝑻𝒊𝒕𝒖𝒍𝒐: ${videoTitle}
+❥ 𝑫𝒖𝒓𝒂𝒄𝒊𝒐𝒏: ${videoDuration}
+❥ 𝑻𝒂𝒎𝒂𝒏̃𝒐: ${sizeMB.toFixed(2)}MB
+❥ 𝑺𝒐𝒍𝒊 𝒓𝒆𝒔𝒕𝒂𝒏𝒕𝒆𝒔: ${soliRemaining}
+
+🔧 API: api-sky.ultraplus.click
+
+❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`.trim();
+
+    // Enviar el video
+    await sock.sendMessage(msg.key.remoteJid, {
+      video: fs.readFileSync(filePath),
+      mimetype: 'video/mp4',
+      fileName: `${videoTitle}.mp4`,
+      caption: caption
+    }, { quoted: msg });
+
+    // Eliminar archivo temporal
+    fs.unlinkSync(filePath);
+
+    // ✅ Reacción de éxito
+    await sock.sendMessage(msg.key.remoteJid, {
+      react: { text: '✅', key: msg.key }
+    });
+
+  } catch (error) {
+    console.error("❌ Error en ytmp4:", error.message);
+    
+    let errorMsg = `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n❌ *Error al procesar el video:*\n`;
+    
+    if (error.response?.status === 401) {
+      errorMsg += "🔹 *Error de autenticación en la API.*\n🔹 Verifica tu API Key.";
+    } else if (error.response?.status === 402) {
+      errorMsg += "🔹 *No tienes suficientes soli.*\n🔹 Recarga tus créditos.";
+    } else if (error.code === 'ECONNABORTED') {
+      errorMsg += "🔹 *Tiempo de espera agotado.*\n🔹 El servidor tardó demasiado.";
+    } else if (error.message.includes('API inválida')) {
+      errorMsg += "🔹 *Error en la API de Sky.*\n🔹 Inténtalo más tarde.";
+    } else if (error.message.includes('No se pudo obtener')) {
+      errorMsg += "🔹 *No se pudo descargar el video.*\n🔹 Verifica el enlace.";
+    }
+    
+    errorMsg += "\n\n🔹 _Inténtalo más tarde._\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦";
+
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: errorMsg
     }, { quoted: msg });
 
     await sock.sendMessage(msg.key.remoteJid, {
