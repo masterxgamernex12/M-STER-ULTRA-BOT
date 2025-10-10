@@ -14630,7 +14630,7 @@ case "tt":
         const API_KEY  = process.env.API_KEY  || "Russellxz";
 
         // Llamar a tu API de TikTok
-        const response = await axios.get(`${API_BASE}/api/download/tiktok`, {
+        const response = await axios.get(`${API_BASE}/api/download/tiktok.js`, {
             params: { url: args[0] },
             headers: { 
                 Authorization: `Bearer ${API_KEY}`,
