@@ -14522,84 +14522,7 @@ case "kick": {
 }
         
         
-case "instagram":
-case "ig":
-    if (!text) return sock.sendMessage(msg.key.remoteJid, { 
-        text: `Ejemplo de uso:\n${global.prefix + command} https://www.instagram.com/p/CCoI4DQBGVQ/` 
-    }, { quoted: msg });
 
-    try {
-        // ⏳ Reacción de carga mientras se procesa
-        await sock.sendMessage(msg.key.remoteJid, {
-            react: { text: '⏳', key: msg.key }
-        });
-
-        const axios = require('axios');
-        const fs = require('fs');
-        const path = require('path');
-
-        const apiUrl = `https://api.dorratz.com/igdl?url=${text}`;
-        const response = await axios.get(apiUrl);
-        const { data } = response.data;
-
-        if (!data || data.length === 0) {
-            return sock.sendMessage(msg.key.remoteJid, { 
-                text: "❌ No se pudo obtener el video de Instagram." 
-            });
-        }
-
-        // 📜 Construcción del mensaje con marca de agua
-        const caption = `🎬 *Video de Instagram*\n\n> 🍧Solicitud procesada por api.dorratz.com\n\n───────\n© Azura Ultra`;
-
-        // Asegurar carpeta tmp
-        const tmpDir = path.resolve('./tmp');
-        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
-
-        // 📩 Descargar y enviar cada video
-        for (let item of data) {
-            const filePath = path.join(tmpDir, `ig-${Date.now()}-${Math.floor(Math.random() * 1000)}.mp4`);
-
-            const videoRes = await axios.get(item.url, { responseType: 'stream' });
-            const writer = fs.createWriteStream(filePath);
-
-            await new Promise((resolve, reject) => {
-                videoRes.data.pipe(writer);
-                writer.on("finish", resolve);
-                writer.on("error", reject);
-            });
-
-            const stats = fs.statSync(filePath);
-            const sizeMB = stats.size / (1024 * 1024);
-
-            if (sizeMB > 99) {
-                fs.unlinkSync(filePath);
-                await sock.sendMessage(msg.key.remoteJid, {
-                    text: `❌ Un video pesa ${sizeMB.toFixed(2)}MB y excede el límite de 99MB.\n\n🔒 No se puede enviar para no saturar los servidores.`
-                }, { quoted: msg });
-                continue;
-            }
-
-            await sock.sendMessage(msg.key.remoteJid, { 
-                video: fs.readFileSync(filePath), 
-                mimetype: 'video/mp4',
-                caption: caption 
-            }, { quoted: msg });
-
-            fs.unlinkSync(filePath);
-        }
-
-        // ✅ Confirmación con reacción de éxito
-        await sock.sendMessage(msg.key.remoteJid, { 
-            react: { text: "✅", key: msg.key } 
-        });
-
-    } catch (error) {
-        console.error(error);
-        await sock.sendMessage(msg.key.remoteJid, { 
-            text: "❌ Ocurrió un error al procesar el enlace de Instagram." 
-        }, { quoted: msg });
-    }
-    break;
         
 case "tiktok":
 case "tt":
@@ -14745,6 +14668,145 @@ case "tt":
         }
         
         errorMsg += "\n🔹 _Inténtalo más tarde._";
+
+        await sock.sendMessage(msg.key.remoteJid, { 
+            text: errorMsg
+        }, { quoted: msg });
+
+        // ❌ Reacción de error
+        await sock.sendMessage(msg.key.remoteJid, { 
+            react: { text: "❌", key: msg.key } 
+        });
+    }
+    break;
+    case "instagram":
+case "ig":
+    if (!text) return sock.sendMessage(msg.key.remoteJid, { 
+        text: `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n📌 *Ejemplo de uso:*\n${global.prefix + command} https://www.instagram.com/p/CCoI4DQBGVQ/\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦` 
+    }, { quoted: msg });
+
+    try {
+        // ⏳ Reacción de carga mientras se procesa
+        await sock.sendMessage(msg.key.remoteJid, {
+            react: { text: '⏳', key: msg.key }
+        });
+
+        const axios = require('axios');
+        const fs = require('fs');
+        const path = require('path');
+
+        // ==== CONFIG DE TU API SKY ====
+        const API_BASE = process.env.API_BASE || "https://api-sky.ultraplus.click";
+        const API_KEY  = process.env.API_KEY  || "Russellxz";
+
+        // Llamar a tu API de Instagram
+        const response = await axios.get(`${API_BASE}/api/download/instagram.js`, {
+            params: { url: text },
+            headers: { 
+                Authorization: `Bearer ${API_KEY}`,
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+            },
+            timeout: 30000
+        });
+
+        if (!response.data || response.data.status !== "true" || !response.data.data) {
+            throw new Error("La API de Sky no devolvió datos válidos.");
+        }
+
+        const mediaData = response.data.data;
+        const mediaItems = mediaData.media || [];
+        const captionText = mediaData.caption || "Sin descripción";
+        const authorName = mediaData.author || "Desconocido";
+        const soliRemaining = response.data.soli_remaining || 0;
+
+        // Buscar el primer video
+        const videoItem = mediaItems.find(item => item.type === 'video');
+        
+        if (!videoItem) {
+            throw new Error("No se encontró un video en la publicación.");
+        }
+
+        // Asegurar carpeta tmp
+        const tmpDir = path.resolve('./tmp');
+        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+
+        const filePath = path.join(tmpDir, `ig-${Date.now()}.mp4`);
+
+        // Descargar el video
+        const videoRes = await axios.get(videoItem.url, { 
+            responseType: 'stream',
+            timeout: 45000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+                'Referer': 'https://www.instagram.com/',
+                'Accept': '*/*'
+            }
+        });
+
+        const writer = fs.createWriteStream(filePath);
+        await new Promise((resolve, reject) => {
+            videoRes.data.pipe(writer);
+            writer.on("finish", resolve);
+            writer.on("error", reject);
+        });
+
+        const stats = fs.statSync(filePath);
+        const sizeMB = stats.size / (1024 * 1024);
+
+        if (sizeMB > 99) {
+            fs.unlinkSync(filePath);
+            return sock.sendMessage(msg.key.remoteJid, {
+                text: `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n❌ El video pesa ${sizeMB.toFixed(2)}MB y excede el límite de 99MB.\n\n🔒 No se puede enviar para no saturar los servidores.\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`
+            }, { quoted: msg });
+        }
+
+        // 📜 Construcción del mensaje
+        const caption = `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦
+
+📀 𝙸𝚗𝚏𝚘 𝚍𝚎𝚕 𝚟𝚒𝚍𝚎𝚘:
+❥ 𝑨𝒖𝒕𝒐𝒓: ${authorName}
+❥ 𝑺𝒐𝒍𝒊 𝒓𝒆𝒔𝒕𝒂𝒏𝒕𝒆𝒔: ${soliRemaining}
+
+📝 𝑫𝒆𝒔𝒄𝒓𝒊𝒑𝒄𝒊𝒐́𝒏:
+${captionText.substring(0, 250)}${captionText.length > 250 ? '...' : ''}
+
+🔧 API: api-sky.ultraplus.click
+
+❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦`.trim();
+
+        // Enviar el video
+        await sock.sendMessage(msg.key.remoteJid, { 
+            video: fs.readFileSync(filePath), 
+            mimetype: 'video/mp4',
+            caption: caption
+        }, { quoted: msg });
+
+        // Eliminar archivo temporal
+        fs.unlinkSync(filePath);
+
+        // ✅ Confirmación con reacción de éxito
+        await sock.sendMessage(msg.key.remoteJid, { 
+            react: { text: "✅", key: msg.key } 
+        });
+
+    } catch (error) {
+        console.error("❌ Error en el comando .instagram:", error.message);
+        
+        let errorMsg = `❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦\n\n❌ *Ocurrió un error al procesar el enlace de Instagram.*\n`;
+        
+        if (error.response?.status === 401) {
+            errorMsg += "🔹 *Error de autenticación en la API.*\n🔹 Verifica tu API Key.";
+        } else if (error.response?.status === 402) {
+            errorMsg += "🔹 *No tienes suficientes soli.*\n🔹 Recarga tus créditos para continuar.";
+        } else if (error.code === 'ECONNABORTED') {
+            errorMsg += "🔹 *Tiempo de espera agotado.*\n🔹 El servidor tardó demasiado en responder.";
+        } else if (error.message.includes('API inválida')) {
+            errorMsg += "🔹 *Error en la API de Sky.*\n🔹 Inténtalo más tarde.";
+        } else if (error.message.includes('No se encontró un video')) {
+            errorMsg += "🔹 *No se encontró un video en la publicación.*\n🔹 Solo se descargan videos.";
+        }
+        
+        errorMsg += "\n\n🔹 _Inténtalo más tarde._\n\n❦𝑳𝑨 𝑺𝑼𝑲𝑰 𝑩𝑶𝑻❦";
 
         await sock.sendMessage(msg.key.remoteJid, { 
             text: errorMsg
