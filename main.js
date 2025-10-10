@@ -14917,7 +14917,8 @@ case "fb":
     }
     break;
 }
-        
+}
+
 
 
 module.exports = { handleCommand };
