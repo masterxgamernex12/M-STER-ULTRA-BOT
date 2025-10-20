@@ -1,4 +1,4 @@
-# 🌟 𝐀𝐙𝐔𝐑𝐀 𝐔𝐋𝐓𝐑𝐀🌟  
+# 🌟 𝙈-𝙎𝙩𝙚𝙧-𝘽𝙤𝙩 🌟  
 🔥 **El bot definitivo para grupos de WhatsApp con sistema RPG, administración avanzada y más.**  
 
 ≪━─━─━─━─◈─━─━─━─━≫  
@@ -6,15 +6,15 @@
 ≪━─━─━─━─◈─━─━─━─━≫  
 
 <p align="center">
-  <img src="https://cdn.russellxz.click/6984cf1b.jpeg" alt="Azura Ultra & Cortana Bot" width="500"/>
+  <img src="https://cdn.russellxz.click/e0fade7f.jpeg" alt="Azura Ultra & Cortana Bot" width="500"/>
 </p>
 
 ≪━─━─━─━─◈─━─━─━─━≫  
 ✧ » ◇ « ✧ » ✦ « ✧ » ◇ « ✧  
 ≪━─━─━─━─◈─━─━─━─━≫  
 
-## 🚀 **¿Qué es Azura Ultra?**  
-**Azura Ultra** es un bot **multifuncional y poderoso** diseñado para mejorar la experiencia en tus grupos de WhatsApp.  
+## 🚀 **¿Qué es 𝙈-𝙎𝙩𝙚𝙧-𝘽𝙤𝙩 ?**  
+**𝙈-𝙎𝙩𝙚𝙧-𝘽𝙤𝙩** es un bot **multifuncional y poderoso** diseñado para mejorar la experiencia en tus grupos de WhatsApp.  
 
 Incluye **sistema RPG**, herramientas de **moderación avanzada**, **minijuegos**, **descargas**, inteligencia integrada y mucho más.  
 
