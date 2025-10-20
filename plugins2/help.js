@@ -100,102 +100,134 @@ const handler = async (msg, { conn }) => {
 ╔⌬ ${nombreMenu}⌬╗
 ║   Menú por categorías  
 ╚═──────────────────═╝
-— 🔹 ya lo subbots tienen rpg de personajes y mascotas y puedes  
-— 🔹 subirlo de nivel para ver los comando usar el rpg usa: 
-✦ ${usedPrefix}menurpg  
-— 🔹 veras todo lo que ocupas saber.
+┏━━━━━━━━━━━
+┃usa:${usedPrefix}menu 
+┃y veras todo lo que ocupas saber.
+┗━━━━━━━━━━━━
 
-〔 👇Haz Que Tus Amigos Sean *SUBBOTS* También Diles Que Envíen Estos Comandos👇 〕
-⟢ ${usedPrefix}serbot / qr
-⟢ ${usedPrefix}code / codigo 
-⟢ ${usedPrefix}sercode / codigo
+┏━━━━━━━━━━━━
+┃👇Haz Que Tus Amigos Sean *SUBBOTS*     También Diles Que Envíen Estos Comando👇
+┃
+┃${usedPrefix}serbot / qr
+┃${usedPrefix}code / codigo 
+┃${usedPrefix}sercode / codigo
+┗━━━━━━━━━━━
 
-〔 AI & Respuestas 〕
-⟢ ${usedPrefix}chatgpt
-⟢ ${usedPrefix}geminis
 
-〔 Descargas 〕
-⟢ ${usedPrefix}play / ${usedPrefix}playdoc
-⟢ ${usedPrefix}play2 / ${usedPrefix}play2doc
-⟢ ${usedPrefix}play5
-⟢ ${usedPrefix}play6
-⟢ ${usedPrefix}ytmp3 / ${usedPrefix}ytmp3doc
-⟢ ${usedPrefix}ytmp35
-⟢ ${usedPrefix}ytmp4 / ${usedPrefix}ytmp4doc
-⟢ ${usedPrefix}ytmp45
-⟢ ${usedPrefix}apk
-⟢ ${usedPrefix}instagram / ${usedPrefix}ig
-⟢ ${usedPrefix}tiktok / ${usedPrefix}tt
-⟢ ${usedPrefix}facebook / ${usedPrefix}fb
+┏━━━━
+┃〔 AI & Respuestas 〕
+┃
+┃${usedPrefix}chatgpt
+┃${usedPrefix}geminis
+┗━━━━━━━━━━━━
 
-〔 Stickers & Multimedia 〕
-⟢ ${usedPrefix}s
-⟢ ${usedPrefix}ver
-⟢ ${usedPrefix}toaudio 
-⟢ ${usedPrefix}hd
-⟢ ${usedPrefix}toimg
-⟢ ${usedPrefix}whatmusic
-⟢ ${usedPrefix}tts
-⟢ ${usedPrefix}perfil
+┏━━━━━━━━━━━━
+┃ 〔 Descargas 〕
+┃
+┃${usedPrefix}play / ${usedPrefix} 
+┃playdoc
+┃${usedPrefix}play2 / ${usedPrefix}
+┃play2doc
+┃${usedPrefix}play5
+┃${usedPrefix}play6
+┃${usedPrefix}ytmp3 / ${usedPrefix}
+┃ytmp3doc
+┃${usedPrefix}ytmp35
+┃${usedPrefix}ytmp4 / ${usedPrefix} 
+┃ytmp4doc
+┃${usedPrefix}ytmp45
+┃${usedPrefix}apk
+┃${usedPrefix}instagram / ${usedPrefix} ig
+┃${usedPrefix}tiktok / ${usedPrefix}tt
+┃${usedPrefix}facebook / ${usedPrefix}fb
+┗━━━━━━━━━━━━━
 
-〔 Grupos 〕
-⟢ ${usedPrefix}abrirgrupo
-⟢ ${usedPrefix}cerrargrupo
-⟢ ${usedPrefix}infogrupo
-⟢ ${usedPrefix}kick
-⟢ ${usedPrefix}modoadmins on o off
-⟢ ${usedPrefix}antilink on o off
-⟢ ${usedPrefix}welcome on o off
-⟢ ${usedPrefix}tag
-⟢ ${usedPrefix}tagall / ${usedPrefix}invocar / ${usedPrefix}todos
-⟢ ${usedPrefix}infogrupo
-⟢ ${usedPrefix}damelink
-⟢ ${usedPrefix}antidelete on o off
-⟢ ${usedPrefix}addco (agrega comando a stickerz)
-⟢ ${usedPrefix}delco (elimina comando)
-⟢ ${usedPrefix}delete
+┏━━━━━━━━━━━
+┃〔 Stickers & Multimedia 〕
+┃
+┃${usedPrefix}s
+┃${usedPrefix}ver
+┃${usedPrefix}toaudio 
+┃${usedPrefix}hd
+┃${usedPrefix}toimg
+┃${usedPrefix}whatmusic
+┃${usedPrefix}tts
+┃${usedPrefix}perfil
+┗━━━━━━━━━━━━━━━━━━
 
-〔 Comandos De Juegos 〕
-⟢ ${usedPrefix}verdad
-⟢ ${usedPrefix}reto
-⟢ ${usedPrefix}memes o meme
-⟢ ${usedPrefix}kiss
-⟢ ${usedPrefix}topkiss
-⟢ ${usedPrefix}slap
-⟢ ${usedPrefix}topslap
-⟢ ${usedPrefix}mixemoji
-⟢ ${usedPrefix}aniemoji
+┏━━━━━━━━━━━
+┃〔 Grupos 〕
+┃
+┃${usedPrefix}abrirgrupo
+┃${usedPrefix}cerrargrupo
+┃${usedPrefix}infogrupo
+┃${usedPrefix}kick
+┃${usedPrefix}modoadmins on o off
+┃${usedPrefix}antilink on o off
+┃${usedPrefix}welcome on o off
+┃${usedPrefix}tag
+┃${usedPrefix}tagall / ${usedPrefix}
+┃invocar / ${usedPrefix}todos
+┃${usedPrefix}infogrupo
+┃${usedPrefix}damelink
+┃${usedPrefix}antidelete on o off
+┃${usedPrefix}addco (agrega comando al 
+┃stickerz)
+┃${usedPrefix}delco (elimina comando)
+┃${usedPrefix}delete
+┗━━━━━━━━━━━━━━━
 
-〔 Configuración & Dueño 〕
-▣ ${usedPrefix}antideletepri on o off
-▣ ${usedPrefix}setprefix ↷
-  Cambiar prefijo del subbot
-▣ ${usedPrefix}creador ↷
-  Contacto del creador
-▣ ${usedPrefix}get ↷
-  Descargar estados
-▣ ${usedPrefix}addgrupo ↷
-  Autorizar grupo pa que lo usen.
-▣ ${usedPrefix}addlista ↷
-  Autorizar usuario privado pa lo usen.
-▣ ${usedPrefix}dellista ↷
-  Quitar usuario autorizado pa que no lo usen.
-▣ ${usedPrefix}delgrupo ↷
-  Eliminar grupo autorizado pa que no lo usen.
-▣ ${usedPrefix}ping ↷
-  Medir latencia del bot
-▣ ${usedPrefix}Setmenu ↷
-  personaliza tu subbot
-▣ ${usedPrefix}delmenu ↷
-  quita lo personalizado
+┏━━━━━━━━━━
+┃〔 Comandos De Juegos 〕
+┃${usedPrefix}verdad
+┃${usedPrefix}reto
+┃${usedPrefix}memes o meme
+┃${usedPrefix}kiss
+┃${usedPrefix}topkiss
+┃${usedPrefix}slap
+┃${usedPrefix}topslap
+┃${usedPrefix}mixemoji
+┃${usedPrefix}aniemoji
+┗━━━━━━━━━━━━━━
 
-═⌬ AZURA ULTRA 2.0 Subbot ⌬═`.trim();
+┏━━━━━━━━━━━
+┃〔 Configuración & Dueño 〕
+┃
+┃${usedPrefix}antideletepri on o off
+┃${usedPrefix}setprefix ↷
+┃Cambiar prefijo del subbot
+┃${usedPrefix}creador ↷
+┃Contacto del creador
+┃${usedPrefix}get ↷
+┃Descargar estados
+┃${usedPrefix}addgrupo ↷
+┃Autorizar grupo pa que lo usen.
+┃${usedPrefix}addlista ↷
+┃Autorizar usuario privado pa lo usen.
+┃${usedPrefix}dellista ↷
+┃Quitar usuarios autorizados para que no
+┃lo usen.
+┃${usedPrefix}delgrupo ↷
+┃Eliminar grupo autorizado pa que no lo 
+┃usen.
+┃${usedPrefix}ping ↷
+┃Medir latencia del bot
+┃${usedPrefix}Setmenu ↷
+┃personaliza tu subbot
+┃${usedPrefix}delmenu ↷
+┃quita lo personalizado
+┗━━━━━━━━━━━━━
+
+grupo oficial de 𝙈-𝙎𝙩𝙚𝙧-𝘽𝙤𝙩 🔹
+🔗 https://chat.whatsapp.com/IN2dNxVceScLqXQCGEq5dY
+
+═⌬ M-STER ULTRA BOT Subbot ⌬═`.trim();
     }
 
     await conn.sendMessage(
       msg.key.remoteJid,
       {
-        image: imageBuffer ? imageBuffer : { url: `https://cdn.russellxz.click/654e40ee.jpeg` },
+        image: imageBuffer ? imageBuffer : { url: `https://cdn.russellxz.click/75755d3a.jpeg` },
         caption,
       },
       { quoted: msg }
