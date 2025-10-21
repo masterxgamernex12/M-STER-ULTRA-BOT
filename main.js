@@ -3528,7 +3528,7 @@ case 'menuowner': {
 
     const chatId = msg.key.remoteJid;
     const captionText = `╔═══════════╗  
-║    𝘼𝙕𝙐𝙍𝘼 𝙐𝙇𝙏𝙍𝘼      
+║    M-STER-ULTRA-BOT       
 ╚═══════════╝  
 
             𝐌𝐄𝐍𝐔 𝐎𝐖𝐍𝐄𝐑  
@@ -3565,10 +3565,10 @@ case 'menuowner': {
 
       𝗗𝗲𝘀𝗮𝗿𝗿𝗼𝗹𝗹𝗮𝗱𝗼 𝗽𝗼𝗿: ʳᵘˢˢᵉˡˡ ˣᶻ  
 
-         𝙖𝙯𝙪𝙧𝙖 𝙪𝙡𝙩𝙧𝙖`;
+         M-ster 𝙪𝙡𝙩𝙧𝙖`;
 
     const videoResponse = await axios.get(
-      "https://cdn.russellxz.click/83229a2d.jpeg",
+      "https://cdn.russellxz.click/31504fde.jpeg",
       { responseType: 'arraybuffer' }
     );
 
@@ -3693,7 +3693,7 @@ case 'menu': {
 
     const chatId = msg.key.remoteJid;
     const captionText = `╔═════════════╗  
-║ 𝐀𝐙𝐔𝐑𝐀 𝐔𝐋𝐓𝐑𝐀  
+║ M-STER-ULTRA-BOT   
 ║   🤖 𝘼𝙎𝙄𝙎𝙏𝙀𝙉𝙏𝙀 🤖     
 ╚═════════════╝  
 
@@ -3862,17 +3862,16 @@ case 'menu': {
 ⎔ ${global.prefix}Neko
 
 ╭─────────────────╮  
- ✦ 𝘼𝙕𝙐𝙍𝘼 𝙐𝙇𝙏𝙍𝘼 𝙀𝙎𝙏Á 𝙀𝙉 𝘾𝙊𝙉𝙎𝙏𝘼𝙉𝙏𝙀 𝘿𝙀𝙎𝘼𝙍𝙍𝙊𝙇𝙇𝙊. 
-  𝙎𝙀 𝘼𝙂𝙍𝙀𝙂𝘼𝙍Á𝙉 𝙈Á𝙎 𝙁𝙐𝙉𝘾𝙄𝙊𝙉𝙀𝙎 𝙋𝙍𝙊𝙉𝙏𝙊.   
+ ✦  M-STER-ULTRA-BOT.   
 ╰─────────────────╯  
 
-👨‍💻 𝘿𝙚𝙨𝙖𝙧𝙧𝙤𝙡𝙡𝙖𝙙𝙤 𝙥𝙤𝙧 𝙍𝙪𝙨𝙨𝙚𝙡𝙡 𝙓𝙕`;
+👨‍💻 𝘿𝙚𝙨𝙖𝙧𝙧𝙤𝙡𝙡𝙖𝙙𝙤 𝙥𝙤𝙧 wilker s`;
 
     // Enviar usando sendMessage2
     await sock.sendMessage2(
   chatId,
   {
-    image: { url: "https://cdn.russellxz.click/752ef2f1.jpeg" }, 
+    image: { url: "https://cdn.russellxz.click/3cdc5bdd.jpeg" }, 
     caption: captionText 
   },
   msg 
@@ -3896,7 +3895,7 @@ case 'menugrupo': {
 
     const chatId = msg.key.remoteJid;
     const captionText = `╔════════════════╗  
-║  𝐀𝐙𝐔𝐑𝐀 𝐔𝐋𝐓𝐑𝐀             
+║   M-STER-ULTRA-BOT             
 ║   🎭 𝙼𝙴𝙽𝚄 𝙳𝙴 𝙶ℝ𝚄𝙿𝙾 🎭    
 ╚════════════════╝  
 
@@ -3949,7 +3948,7 @@ case 'menugrupo': {
 
 📌 𝐌Á𝐒 𝐂𝐎𝐌𝐀𝐍𝐃𝐎𝐒 𝐏𝐑Ó𝐗𝐈𝐌𝐀𝐌𝐄𝐍𝐓𝐄...
 
-⟢ 𝐀𝐙𝐔𝐑𝐀 𝐔𝐋𝐓𝐑𝐀 ⟣`;
+⟢ M-STER-ULTRA-BOT ⟣`;
 
     const videoResponse = await axios.get("https://cdn.russellxz.click/c113150e.jpeg", { 
       responseType: 'arraybuffer' 
@@ -3958,7 +3957,7 @@ case 'menugrupo': {
     await sock.sendMessage2(
   chatId,
   {
-    image: { url: "https://cdn.russellxz.click/c113150e.jpeg" }, 
+    image: { url: ":https://cdn.russellxz.click/3cdc5bdd.jpeg" }, 
     caption: captionText 
   },
   msg
