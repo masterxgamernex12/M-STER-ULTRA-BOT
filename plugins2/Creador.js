@@ -1,5 +1,5 @@
 const handler = async (msg, { conn }) => {
-  const ownerNumber = "55272588492827@s.whatsapp.net"; // Número del creador
+  const ownerNumber = "+5492644138998@s.whatsapp.net"; // Número del creador
   const ownerName = "wilker s 🤖"; // Nombre visible del creador
 
   const messageText = `📞 *Contacto del Creador del Subbot:*
