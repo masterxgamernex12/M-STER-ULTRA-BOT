@@ -76,16 +76,16 @@ module.exports = async (msg, { conn, text }) => {
 
   const caption = `
 ╔═══════════════╗
-║✦ 𝘼𝙕𝙐𝙍𝘼 𝙐𝗹𝘁𝗿𝗮 2.0 BOT✦
+║✦ *M-ster* *BOT*✦
 ╚═══════════════╝
 📀 Info del video:
-╭───────────────╮
-├ 🎼 Título: ${title}
-├ ⏱️ Duración: ${duration}
-├ 👁️ Vistas: ${viewsFmt}
-├ 👤 Autor: ${author?.name || author || "Desconocido"}
-└ 🔗 Link: ${videoUrl}
-╰───────────────╯
+╭➤
+┣ 🎼 Título: ${title}
+┣ ⏱️ Duración: ${duration}
+┣ 👁️ Vistas: ${viewsFmt}
+┣ 👤 Autor: ${author?.name || author ||   "Desconocido"}
+┃ 🔗 Link: ${videoUrl}
+╰━━━━━━━━━━━━━━━━━━━━━━━ 
 📥 Opciones de Descarga (reacciona o responde):
 ┣ 👍 Audio MP3     (1 / audio)
 ┣ ❤️ Video MP4     (2 / video)
