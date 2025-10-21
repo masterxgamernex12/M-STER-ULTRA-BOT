@@ -134,4 +134,4 @@ async function addExif(webpBuffer, metadata) {
 
 function randomFileName(ext) {
   return `${Crypto.randomBytes(6).readUIntLE(0, 6).toString(36)}.${ext}`;
-}.
+}
