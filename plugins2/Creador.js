@@ -1,13 +1,13 @@
 const handler = async (msg, { conn }) => {
-  const ownerNumber = "15167096032@s.whatsapp.net"; // Número del creador
-  const ownerName = "Russell xz 🤖"; // Nombre visible del creador
+  const ownerNumber = "55272588492827@s.whatsapp.net"; // Número del creador
+  const ownerName = "wilker s 🤖"; // Nombre visible del creador
 
   const messageText = `📞 *Contacto del Creador del Subbot:*
 
 Si tienes dudas, preguntas o sugerencias sobre el funcionamiento de *Azura Ultra 2.0 Subbot*, puedes contactar a su creador.
 
-📌 *Nombre:* Russell
-📌 *Número:* +1 (516) 709-6032
+📌 *Nombre:* wilker
+📌 *Número:* +5492644138998
 💬 *Toca el contacto para enviarle un mensaje directo.`;
 
   // Enviar contacto vCard
