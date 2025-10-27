@@ -76,7 +76,7 @@ module.exports = async (msg, { conn, text }) => {
 
   const caption = `
 ╔═══════════════╗
-║✦ M-STER ULTRA BOT✦
+║✦ 𝘼𝙕𝙐𝙍𝘼 𝙐𝗹𝘁𝗿𝗮 2.0 BOT✦
 ╚═══════════════╝
 📀 Info del video:
 ╭───────────────╮
@@ -94,7 +94,7 @@ module.exports = async (msg, { conn, text }) => {
 
 ✦ Source: api-sky.ultraplus.click
 ═════════════════════
-   𖥔 M-STER-ULTRA-BOT 𖥔
+   𖥔 Azura Ultra 2.0 Bot 𖥔
 ═════════════════════`.trim();
 
   // envía preview
